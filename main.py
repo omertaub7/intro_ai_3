@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 from sklearn import tree, metrics
 import graphviz
 import csv
+from sklearn.externals.six import StringIO
+from IPython.display import Image
+from sklearn.tree import export_graphviz
+import pydotplus
+import os
+os.environ["PATH"] += os.pathsep + 'C:\\Anaconda3\\Library\\bin\\graphviz'
 #Read Train file
 clf = tree.DecisionTreeClassifier()
 train_file = open('train.csv')
@@ -26,10 +32,7 @@ clf_results = clf.predict(test_data)
 #Generate prediction tree
 print(metrics.confusion_matrix(test_results,clf_results))
 
-from sklearn.externals.six import StringIO
-from IPython.display import Image
-from sklearn.tree import export_graphviz
-import pydotplus
+
 
 #Now we are going to prune the tree
 for val in [3, 9, 27]:
@@ -38,5 +41,9 @@ for val in [3, 9, 27]:
     print("~~~~~~~~~ X =", val, "~~~~~~~~~")
     clf_results = clf.predict(test_data)
     print(metrics.confusion_matrix(test_results,clf_results))
-    tree.plot_tree(clf)
-    plt.show()
+    dot_data = StringIO()
+    export_graphviz(clf, out_file=dot_data,
+                    filled=True, rounded=True,
+                    special_characters=True)
+    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    Image(graph.create_png())
