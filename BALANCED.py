@@ -41,3 +41,4 @@ clf_results = clf.predict(test_data)
 conf_mat1=metrics.confusion_matrix(test_results,clf_results)
 conf_mat1[0][0],conf_mat1[1][1]=conf_mat1[1][1],conf_mat1[0][0]
 print(conf_mat1)
+
