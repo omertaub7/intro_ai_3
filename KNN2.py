@@ -3,7 +3,7 @@ import pandas as pn
 import numpy.matlib as np
 
 
-def knn_2():
+def knn_2(k : int):
     def normalize(train: pn.DataFrame, test: pn.DataFrame):
         for (columnName, columnData) in train.iteritems():
             max, min = train[columnName].max(), train[columnName].min()
@@ -28,20 +28,22 @@ def knn_2():
     normalize(train_data_frame, test_data_frame)
 
     test_result = []
-    k = 9
+
     for _, test_row in test_data_frame.iterrows():
         dists = []
         for _, train_row in train_data_frame.iterrows():
             dists.append((auclidic_distance(train_row, test_row), train_row['Outcome']))
         dists.sort(key=lambda tup: tup[0])
-        knn_9 = dists[0:k]
-        sum = 0
-        for i in knn_9:
+        knn_k = dists[0:k]
+        pos_sum = 0
+        neg_sum=0
+        for i in knn_k:
             if i[1]==1:
-                sum+=4  # new classifying rule gives 4 times weight for positive examples
+                pos_sum+=4  # new classifying rule gives 4 times weight for positive examples
+            if i[1]==0:
+                neg_sum+=1
 
-
-        test_result.append(1 if sum > k / 2 else 0)
+        test_result.append(1 if pos_sum > neg_sum else 0)
 
     # Calculate confustion matrix
     conf_mat = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
@@ -58,6 +60,8 @@ def knn_2():
     return [[conf_mat['TP'], conf_mat['FP']] ,[conf_mat['FN'], conf_mat['TN']]]
 
 
-conf_matrix = knn_2()
-print("[",conf_matrix[0],'\n', conf_matrix[1], "]", sep='')
+for k in [1,3,9,27]:
+    print("--k : " , k)
+    conf_matrix = knn_2(k)
+    print("[",conf_matrix[0],'\n', conf_matrix[1], "]", sep='')
 
