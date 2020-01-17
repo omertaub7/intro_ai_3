@@ -1,7 +1,7 @@
 import csv
 import itertools
 import pandas as pn
-
+"""
 train_file = open('train.csv')
 data = csv.reader(train_file, delimiter=',')
 train_data, train_results = [], []
@@ -17,12 +17,13 @@ for row in data:
     test_data.append(row[0:8])
     test_results.append(row[8])
 test_data, test_results=test_data[1:len(test_data)], test_results[1:len(test_results)]
+"""
 #Get all subsets
-subsets = []
+all_subsets = []
 for i in range(8):
     combi = (set(itertools.combinations({0,1,2,3,4,5,6,7}, i)))
     for x in combi:
-        subsets.append(x)
+        all_subsets.append(x)
 
 train_data_frame = pn.read_csv('train.csv')
 test_data_frame = pn.read_csv('test.csv')
@@ -39,10 +40,10 @@ def normalize(train: pn.DataFrame, test: pn.DataFrame):
         test[columnName] = ((test[columnName] - min) / (max - min))
 
 
-for s in subsets:
-    if s == ():
+for subset in all_subsets:
+    if subset == ():
         continue
-    traits_to_remove = {0,1,2,3,4,5,6,7} - set(s)
+    traits_to_remove = {0,1,2,3,4,5,6,7} - set(subset)
     check_train = train_data_frame.drop(train_data_frame.columns[list(traits_to_remove)], axis=1)
     check_train = check_train.drop(labels='Outcome', axis=1)
     check_test =  test_data_frame.drop(test_data_frame.columns[list(traits_to_remove)], axis=1)
@@ -50,7 +51,7 @@ for s in subsets:
     clf = nb.KNeighborsClassifier(n_neighbors=9)
     normalize(check_train, check_test)
     clf.fit(check_train.values, train_data_frame['Outcome'])
-    res = clf.predict(check_test[train_data_frame.columns[list(s)]]).tolist()
+    res = clf.predict(check_test[train_data_frame.columns[list(subset)]]).tolist()
     conf_mat = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
     for (val, real_val) in zip(res, test_data_frame['Outcome'].tolist()):
         if val == real_val and val == 1:
@@ -63,7 +64,8 @@ for s in subsets:
             conf_mat['FP'] += 1
 
     correct = conf_mat['TP'] + conf_mat['TN']
-    if correct > best_val:
-        best_subset, best_val = s, correct
+    if correct >= best_val:
+        best_subset, best_val = subset, correct
 
 print(list(map(lambda x: "ind"+str(x), best_subset)))
+print("best val: ", best_val/200)
