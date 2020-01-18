@@ -3,7 +3,7 @@ import pandas as pn
 import numpy.matlib as np
 
 
-def knn_1():
+def knn_1(train_data_frame, test_data_frame, subset: list = None):
     def normalize(train: pn.DataFrame, test: pn.DataFrame):
         for (columnName, columnData) in train.iteritems():
             max, min = train[columnName].max(), train[columnName].min()
@@ -11,19 +11,24 @@ def knn_1():
                         train[columnName].max() - train[columnName].min()))
             test[columnName] = ((test[columnName] - min) / (max - min))
 
-    def auclidic_distance(x: pn.DataFrame, y: pn.DataFrame) -> float:
+    def auclidic_distance(x: pn.DataFrame, y: pn.DataFrame, subset : list) -> float:
         sum = 0
         params = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI',
                   'DiabetesPedigreeFunction',
                   'Age']
-        for p in params:
+        modified_params = []
+        if subset is None:
+            modified_params = params
+        elif len(subset) == 1:
+            modified_params.append(params[subset[0]])
+        else:
+            for idx in subset:
+                modified_params.append(params[idx])
+        for p in modified_params:
             sum += abs(x[p] - y[p]) ** 2
         return np.sqrt(sum)
 
     # Read Train  and file
-
-    train_data_frame = pn.read_csv('train.csv')
-    test_data_frame = pn.read_csv('test.csv')
 
     normalize(train_data_frame, test_data_frame)
 
@@ -32,7 +37,7 @@ def knn_1():
     for _, test_row in test_data_frame.iterrows():
         dists = []
         for _, train_row in train_data_frame.iterrows():
-            dists.append((auclidic_distance(train_row, test_row), train_row['Outcome']))
+            dists.append((auclidic_distance(train_row, test_row, subset), train_row['Outcome']))
         dists.sort(key=lambda tup: tup[0])
         knn_9 = dists[0:k]
         sum = 0
@@ -55,6 +60,7 @@ def knn_1():
     return [[conf_mat['TP'], conf_mat['FP']] ,[conf_mat['FN'], conf_mat['TN']]]
 
 
-conf_matrix = knn_1()
+train_data_frame = pn.read_csv('train.csv')
+test_data_frame = pn.read_csv('test.csv')
+conf_matrix = knn_1(train_data_frame, test_data_frame)
 print("[",conf_matrix[0],'\n', conf_matrix[1], "]", sep='')
-

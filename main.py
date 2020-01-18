@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from sklearn import tree, metrics
-
+import numpy as np
 import csv
 
 #Read Train file
@@ -31,10 +31,21 @@ for row in data:
 test_data, test_results=test_data[1:len(test_data)], test_results[1:len(test_results)]
 #Test the tree
 clf_results = clf.predict(test_data)
+for prob in [0.05, 0.1, 0.2]:
+    edited_results = []
+    for val in clf_results:
+        if (val == '0'):
+            edited_results.append(np.random.choice(['0','1'], p=[1-prob, prob]))
+        else:
+            edited_results.append(val)
+    conf_mat1 = metrics.confusion_matrix(test_results, edited_results )
+    conf_mat1[0][0], conf_mat1[1][1] = conf_mat1[1][1], conf_mat1[0][0]
+    Error_w = 4*conf_mat1[1][0] + conf_mat1[0][1]
+    print("For probability of ", prob, "we got error of", Error_w)
+    print(conf_mat1)
+
 #Generate prediction tree
-conf_mat1=metrics.confusion_matrix(test_results,clf_results)
-conf_mat1[0][0],conf_mat1[1][1]=conf_mat1[1][1],conf_mat1[0][0]
-print(conf_mat1)
+
 
 
 

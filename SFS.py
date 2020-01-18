@@ -21,8 +21,9 @@ while True:
             continue
         subset = init_subset.copy() # make sure for deep copy
         subset.append(i)
+        s = tuple(sorted(subset))
         #from now and on, same logic as OPT
-        traits_to_remove = {0, 1, 2, 3, 4, 5, 6, 7} - set(subset)
+        traits_to_remove = {0, 1, 2, 3, 4, 5, 6, 7} - set(s)
         check_train = train_data_frame.drop(train_data_frame.columns[list(traits_to_remove)], axis=1)
         check_train = check_train.drop(labels='Outcome', axis=1)
         check_test = test_data_frame.drop(test_data_frame.columns[list(traits_to_remove)], axis=1)
@@ -30,7 +31,7 @@ while True:
         clf = nb.KNeighborsClassifier(n_neighbors=9)
         normalize(check_train, check_test)
         clf.fit(check_train.values, train_data_frame['Outcome'])
-        res = clf.predict(check_test[train_data_frame.columns[list(subset)]]).tolist()
+        res = clf.predict(check_test[train_data_frame.columns[list(s)]]).tolist()
         conf_mat = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
         for (val, real_val) in zip(res, test_data_frame['Outcome'].tolist()):
             if val == real_val and val == 1:
@@ -49,5 +50,5 @@ while True:
     if changed == False:
         break
 
-print(list(map(lambda x: "ind"+str(x), best_subset)))
+print(sorted(list(map(lambda x: "ind"+str(x), best_subset))))
 
