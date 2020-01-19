@@ -64,8 +64,7 @@ for subset in all_subsets:
             conf_mat['FP'] += 1
 
     correct = conf_mat['TP'] + conf_mat['TN']
-    if correct >= best_val:
+    if correct > best_val:
         best_subset, best_val = subset, correct
 
 print(list(map(lambda x: "ind"+str(x), best_subset)))
-print("best val: ", best_val/200)

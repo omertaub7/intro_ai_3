@@ -50,5 +50,4 @@ while True:
     if changed == False:
         break
 
-print(sorted(list(map(lambda x: "ind"+str(x), best_subset))))
-
+print (list(map(lambda x: "ind"+str(x), best_subset)))
